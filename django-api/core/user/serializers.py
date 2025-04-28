@@ -6,6 +6,8 @@ from core.user.models import User
 class UserSerializer(serializers.ModelSerializer):
     # Rewriting some fields like the public id to be represented as the id of the object
     id = serializers.UUIDField(source="public_id", read_only=True, format="hex")
+    created = serializers.DateTimeField(read_only=True)
+    updated = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = User
@@ -23,4 +25,4 @@ class UserSerializer(serializers.ModelSerializer):
             "updated",
         ]
         # List of all the fields that can only be read by the user
-        read_only_fields = ["is_active", "created", "updated"]
+        read_only_fields = ["is_active"]
