@@ -11,13 +11,8 @@ class PostSerializer(AbstractSerializer):
     author = serializers.SlugRelatedField(
         queryset=User.objects.all(), slug_field="public_id"
     )
-
-    def validate_author(self, value):
-        # A context dictionary is available in every serializer. It usually contains the request object that we can use to make some checks.
-        if self.context["request"].user != value:
-            raise ValidationError("You can't create a post for another user.")
-
-        return value
+    liked = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -35,7 +30,34 @@ class PostSerializer(AbstractSerializer):
 
         return instance
 
+    def validate_author(self, value):
+        # A context dictionary is available in every serializer. It usually contains the request object that we can use to make some checks.
+        if self.context["request"].user != value:
+            raise ValidationError("You can't create a post for another user.")
+
+        return value
+
+    def get_liked(self, instance):
+        request = self.context.get("request")
+
+        if request is None or request.user.is_anonymous:
+            return False
+
+        return request.user.has_liked(instance)
+
+    def get_likes_count(self, instance):
+        return instance.liked_by.count()
+
     class Meta:
         model = Post
-        fields = ["id", "author", "body", "edited", "created", "updated"]
+        fields = [
+            "id",
+            "author",
+            "body",
+            "edited",
+            "created",
+            "updated",
+            "likes_count",
+            "liked",
+        ]
         read_only_fields = ["edited"]
