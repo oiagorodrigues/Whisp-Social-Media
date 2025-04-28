@@ -1,24 +1,14 @@
-import uuid
+from core.abstract.models import AbstractModel, AbstractManager
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.http import Http404
 
 
-class UserManager(BaseUserManager):
-    def get_object_by_public_id(self, public_id):
-
-        try:
-            instance = self.get(public_id=public_id)
-            return instance
-        except (ObjectDoesNotExist, ValueError, TypeError):
-            return Http404
-
+class UserManager(BaseUserManager, AbstractManager):
     def create_user(self, username, email, password=None, **kwargs):
         """Create and return a `User` with an email, phone number, username and password."""
         if username is None:
@@ -55,10 +45,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    public_id = models.UUIDField(
-        db_index=True, unique=True, default=uuid.uuid4, editable=False
-    )
+class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
     username = models.CharField(db_index=True, max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -69,9 +56,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     bio = models.TextField(null=True)
     avatar = models.ImageField(null=True)
-
-    created = models.DateTimeField(auto_now=True)
-    updated = models.DateTimeField(auto_now_add=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
