@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "core.user",
     "core.auth",
     "core.post",
+    "core.comment",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
